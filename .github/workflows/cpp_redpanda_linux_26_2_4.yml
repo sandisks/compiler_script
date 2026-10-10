@@ -1,0 +1,35 @@
+name: build cpp/redpanda/linux/26_2_4
+
+on:
+  push:
+    branches:
+      - 'cpp/redpanda/linux/26_2_4'
+  pull_request:
+    branches:
+      - 'cpp/redpanda/linux/26_2_4'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    steps:
+      - name: Set up Bazelisk
+        uses: bazelbuild/setup-bazelisk@v3
+      - name: Clone matching private source branch
+        env:
+          GH_TOKEN: ${{ secrets.COMPILER_PAT }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh repo clone "$GITHUB_REPOSITORY_OWNER/github_codespaces_compile" source -- --depth=1 --single-branch --branch "$GITHUB_REF_NAME"
+      - name: Execute source script
+        working-directory: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x -- 'cpp/redpanda/linux/26_2_4/build.sh'
+          './cpp/redpanda/linux/26_2_4/build.sh'
